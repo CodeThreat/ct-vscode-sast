@@ -1,14 +1,14 @@
 {
   "publisher": "CodeThreat",
-  "license": "MIT",
+  "license": "LGPL-3.0",
   "homepage": "https://codethreat.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CodeThreat/ct-vscode",
+    "url": "https://github.com/CodeThreat/ct-vscode-sast",
     "directory": "./"
   },
   "bugs": {
-    "url": "https://github.com/CodeThreat/ct-vscode/issues"
+    "url": "https://github.com/CodeThreat/ct-vscode-sast/issues"
   },
   "icon": "media/assets/CT-logo.png",
   "keywords": [
