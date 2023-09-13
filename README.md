@@ -1,12 +1,3 @@
-
-
-<br />
-<p align="center">
-  <a href="https://codethreat.com">
-    <img src="media/assets/CT-logo.png" alt="Logo" width="50">
-  </a>
-</p>
-
 ## CodeThreat VSCode Plugin
 
 Introducing the CodeThreat VSCode Plugin, a paradigm shift in coding securely. This plugin harnesses the power of AI to supercharge your static application security testing process, providing a robust, streamlined alternative to traditional, bulkier SAST tools.
