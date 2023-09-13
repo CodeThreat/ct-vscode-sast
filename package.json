@@ -1,0 +1,215 @@
+{
+  "publisher": "CodeThreat",
+  "license": "MIT",
+  "homepage": "https://codethreat.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodeThreat/ct-vscode",
+    "directory": "./"
+  },
+  "bugs": {
+    "url": "https://github.com/CodeThreat/ct-vscode/issues"
+  },
+  "icon": "media/assets/CT-logo.png",
+  "keywords": [
+    "SAST",
+    "Analysis",
+    "Code Quality",
+    "AI",
+    "LLM",
+    "Linting",
+    "Security",
+    "Code Scan",
+    "Vulnerability Detection",
+    "Static Analysis",
+    "CodeThreat",
+    "VSCode Security",
+    "Extension"
+  ],
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "name": "codethreat-vscode",
+  "displayName": "CodeThreat VSCode Plugin",
+  "description": "CodeThreat provides static application security testing capabilities to help developers identify and fix security vulnerabilities in their code. This extension integrates CodeThreat's advanced SAST engine into VSCode, offering integrated code scanning, linting, and AI-assisted analysis to enhance code quality and security.",
+  "version": "0.89.7",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codethreat-vscode.codethreat",
+        "title": "codethreat"
+      },
+      {
+        "command": "codethreat-vscode.scan",
+        "category": "codethreat",
+        "title": "Start the Scan"
+      },
+      {
+        "command": "codethreat-vscode.Refresh",
+        "category": "codethreat",
+        "title": "Refresh the Issue",
+        "icon": {
+          "dark": "./media/assets/arrow-2-circlepath-white.svg",
+          "light": "./media/assets/arrow-2-circlepath-black.svg"
+        }
+      },
+      {
+        "command": "codethreat-vscode.help",
+        "category": "codethreat",
+        "title": "Help",
+        "icon": {
+          "dark": "./media/assets/help-white.svg",
+          "light": "./media/assets/help-black.svg"
+        }
+      },
+      {
+        "command": "codethreat-vscode.settings",
+        "category": "codethreat",
+        "title": "Settings",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "codethreat-vscode.showProgress",
+        "title": "Show Progress Notification",
+        "category": "codethreat"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Codethreat Settings",
+        "properties": {
+          "codethreat-vscode.settings": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable/Disable a feature"
+          }
+        }
+      },
+      {
+        "id": "codethreatOrganization",
+        "title": "CodeThreat - Organization",
+        "order": 2,
+        "properties": {
+          "codethreat-vscode.codethreatOrganization": {
+            "type": "string",
+            "description": "CodeThreat Organization ID.`Documentation` ",
+            "editPresentation": "multilineText"
+          }
+        }
+      },
+      {
+        "id": "codethreatApiBaseUrl",
+        "title": "CodeThreat - Api Base Url",
+        "order": 1,
+        "properties": {
+          "codethreat-vscode.codethreatApiBaseUrl": {
+            "type": "string",
+            "description": "Optional override for CodeThreat API base URL. If you customize it, please make sure you have the same format. "
+          }
+        }
+      },
+      {
+        "id": "codethreatApiToken",
+        "title": "CodeThreat - Api Token",
+        "order": 1,
+        "properties": {
+          "codethreat-vscode.codethreatApiToken": {
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codethreat-vscode-activitybar",
+          "title": "CodeThreat",
+          "icon": "media\\assets\\CT-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "codethreat-vscode-activitybar": [
+        {
+          "type": "webview",
+          "id": "codethreat-vscode.barView",
+          "name": "CodeThreat"
+        },
+        {
+          "type": "webview",
+          "id": "codethreat-vscode.askView",
+          "name": "CodeThreat AI Output"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "codethreat-vscode.Refresh",
+          "group": "navigation",
+          "when": "view == codethreat-vscode.barView"
+        },
+        {
+          "command": "codethreat-vscode.help",
+          "group": "navigation",
+          "when": "view == codethreat-vscode.barView"
+        },
+        {
+          "command": "codethreat-vscode.settings",
+          "group": "navigation",
+          "when": "view == codethreat-vscode.barView"
+        },
+        {
+          "command": "codethreat-vscode.Refresh",
+          "group": "navigation",
+          "when": "view == codethreat-vscode.askView"
+        },
+        {
+          "command": "codethreat-vscode.help",
+          "group": "navigation",
+          "when": "view == codethreat-vscode.askView"
+        },
+        {
+          "command": "codethreat-vscode.settings",
+          "group": "navigation",
+          "when": "view == codethreat-vscode.askView"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.78.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.39.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "axios": "^1.4.0"
+  }
+}

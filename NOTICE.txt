@@ -1,0 +1,6 @@
+CodeThreat for Visual Studio Code
+Copyright (C) 2023 CodeThreat Inc.
+mailto:info AT codethreat DOT com
+
+This product includes software developed at
+CodeThreat (http://www.codethreat.com/).
