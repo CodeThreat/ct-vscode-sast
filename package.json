@@ -32,7 +32,7 @@
   ],
   "name": "codethreat-vscode",
   "displayName": "CodeThreat VSCode Plugin",
-  "description": "CodeThreat provides static application security testing capabilities to help developers identify and fix security vulnerabilities in their code. This extension integrates CodeThreat's advanced SAST engine into VSCode, offering integrated code scanning, linting, and AI-assisted analysis to enhance code quality and security.",
+  "description": "CodeThreat provides static application security testing capabilities to help developers identify and fix security vulnerabilities in their code.",
   "version": "0.89.7",
   "engines": {
     "vscode": "^1.78.0"
