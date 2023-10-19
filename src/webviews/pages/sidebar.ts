@@ -1,8 +1,8 @@
-import { Style } from "util";
 import * as vscode from "vscode";
-import { getProjectName } from "../../getRepoUrl";
-import { initExtensionSettings, letStartScan } from "../../extensionSettings";
+import { letStartScan } from "../components/extensionSettings";
+import { getCodeThreatConfig } from "../components/getConfig";
 export let ctMainBarView: vscode.WebviewView | undefined;
+const config = getCodeThreatConfig();
 
 export class barViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "codethreat-vscode.barView";
@@ -30,36 +30,31 @@ export class barViewProvider implements vscode.WebviewViewProvider {
         case "ctSyncActive":
           this._view?.webview.postMessage({
             command: "ctSyncActive",
-            status: data  // status can be either "Active" or "Disabled"
+            status: data,
           });
           break;
         case "startScan":
           let message = await letStartScan();
+          vscode.commands.executeCommand("codethreat-vscode.showProgress");
           this._view?.webview.postMessage({
             command: "scanFinished",
             data: message,
           });
           break;
-        case "getConfig":
-          const configured = vscode.workspace.getConfiguration();
-          const config = {
-            codethreatApiToken: configured.get("codethreat-vscode.codethreatApiToken"),
-            codethreatOrganization: configured.get(
-              "codethreat-vscode.codethreatOrganization"
-            ),
-            codethreatApiBaseUrl: configured.get(
-              "codethreat-vscode.codethreatApiBaseUrl"
-            ),
-            projectName: getProjectName(),
+        case "getConfigQ":
+          const configm = {
+            codethreatApiToken: config?.apiToken,
+            codethreatOrganization: config?.organizatonName,
+            codethreatApiBaseUrl: config?.apiBaseUrl,
+            projectName: config?.projectName,
           };
           this._view?.webview.postMessage({
             command: "configData",
-            data: config,
+            data: configm,
           });
           break;
       }
     });
-    
   }
 
   public startScan() {
@@ -96,12 +91,6 @@ export class barViewProvider implements vscode.WebviewViewProvider {
         "jquery-3.7.1.min.js"
       )
     );
-    const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "css", "reset.css")
-    );
-    const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "css", "vscode.css")
-    );
     const styleMainUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "css", "main.css")
     );
@@ -119,14 +108,11 @@ export class barViewProvider implements vscode.WebviewViewProvider {
         <link href="${styleMainUri}" rel="stylesheet">
 
         <title>CodeThreat</title>
-            <style>
-            
-        </style>
     </head>
-    <div class="content-grow"> <!-- This div wraps all content except the footer, making it push the footer down -->
+    <div class="content-grow">
 
     <body class="bg-dark p-4 full-height-flex">
-      <div class="content-grow"> <!-- This div wraps all content except the footer, making it push the footer down -->
+      <div class="content-grow"> 
       <img src="${logoUri}" alt="CodeThreat Logo" class="mx-auto d-block mb-4" style="max-width: 40px;">
 
        <h4 class="text-center mb-4">CodeThreat VSCode Plugin</h4>
@@ -143,7 +129,7 @@ export class barViewProvider implements vscode.WebviewViewProvider {
           <div class="container-fluid">
         <div class="row">
             <div class="col-12 d-flex justify-content-center mb-3">
-            <button id="scan-button" class="btn btn-primary btn-sm" style="padding: 5px 10px; font-size: 0.8rem;">Syncronize</button>
+            <button id="buttons" class="btn btn-primary btn-sm" style="padding: 5px 10px; font-size: 0.8rem;">Start scan</button>
             </div>
         </div>
     </div>
@@ -154,49 +140,6 @@ export class barViewProvider implements vscode.WebviewViewProvider {
     <small>&copy; ${new Date().getFullYear()} CodeThreat Inc. All rights reserved.</small><br>
     <small><a href="https://github.com/CodeThreat/ct-vscode" class="text-info">Troubleshoot or get help on GitHub repo</a></small>
 </div>
-    
-        <script>
-        const vscode = acquireVsCodeApi();
-
-        document.getElementById("scan-button").addEventListener("click", () => {
-          vscode.postMessage({ command: "startScan" });
-        });
-        document.getElementById("settings").addEventListener("click", () => {
-          vscode.postMessage({ command: "settings" });
-        });
-        window.addEventListener("message", (event) => {
-          console.log("Received message:", event.data); // Debug log
-          const message = event.data;
-          switch (message.command) {
-            case "ctSyncActive":
-              const responseData = message.data;
-              handleCtSyncActiveResponse(responseData);
-              break;
-            case "scanFinished":
-              // Handle scanFinished if needed
-              break;
-            default:
-              break;
-            // ... handle other commands
-          }
-        });
-        function handleCtSyncActiveResponse(data) {
-          const badgeElement = document.querySelector(".badge");
-          const projectNameElement = document.getElementById("projectName");
-        
-          if (data && data.projectName) {
-            badgeElement.textContent = "Active"; // This sets the badge to "Active"
-            badgeElement.classList.remove("badge-danger");
-            badgeElement.classList.add("badge-success");
-        
-            projectNameElement.textContent = data.projectName; // This sets the project name
-          } else {
-            badgeElement.textContent = "Disabled"; // This sets the badge to "Disabled"
-            badgeElement.classList.remove("badge-success");
-            badgeElement.classList.add("badge-danger");
-          }
-        }
-        </script>
         <script type="module" defer nonce="${getNonce()}" src="${bootstrapJs}"></script>
         <script type="module" defer nonce="${getNonce()}" src="${JQueryJS}"></script>
         <script type="module" defer nonce="${getNonce()}" src="${scriptUri}"></script>

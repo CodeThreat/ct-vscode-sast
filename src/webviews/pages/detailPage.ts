@@ -1,12 +1,9 @@
 import * as vscode from "vscode";
-import { extensionState } from "../../extension";
-import { getCodeThreatConfig } from "../components/getConfig";
 
-export let aiOutputWebview: vscode.WebviewView | undefined;
-const config = getCodeThreatConfig();
+export let ctdetailPage: vscode.WebviewView | undefined;
 
-export class askBarViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = "codethreat-vscode.askView";
+export class detailBarViewProvider implements vscode.WebviewViewProvider {
+  public static readonly viewType = "codethreat-vscode.detailView";
   private _view?: vscode.WebviewView;
 
   constructor(private readonly _extensionUri: vscode.Uri) {}
@@ -17,45 +14,35 @@ export class askBarViewProvider implements vscode.WebviewViewProvider {
     _token: vscode.CancellationToken
   ) {
     this._view = webviewView;
-    aiOutputWebview = this._view;
+    ctdetailPage = this._view;
     webviewView.webview.options = {
       enableScripts: true,
       enableCommandUris: true,
       localResourceRoots: [this._extensionUri],
     };
 
-    if (extensionState) {
-      webviewView.webview.postMessage({
-        command: "aiJobResponse",
-        data: extensionState,
-      });
-    }
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    
+
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.command) {
-        case "getConfigQ":
-          const configm = {
-            codethreatApiToken: config?.apiToken,
-            codethreatOrganization: config?.organizatonName,
-            codethreatApiBaseUrl: config?.apiBaseUrl,
-            projectName: config?.projectName,
-          };
-          webviewView.webview.postMessage({
-            command: "configData",
-            data: configm,
-          });
+        case "ctgetDetail":
           break;
       }
     });
   }
   public show() {
     this._view?.show(true);
-}
+  }
+  public gopage() {
+    if (this._view) {
+      this._view.show?.(true);
+      this._view.webview.postMessage({ type: "gopage" });
+    }
+  }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "js", "ask.js")
+      vscode.Uri.joinPath(this._extensionUri, "media", "js", "detail.js")
     );
     const bootstrapJs = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "js", "bootstrap.min.js")
@@ -82,50 +69,64 @@ export class askBarViewProvider implements vscode.WebviewViewProvider {
     const styleMainUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "css", "main.css")
     );
-    const styleQuestionUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "css", "questionPage.css")
+    const svgUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "assets", "readMore.svg")
     );
-
+    const styleDetailUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "css", "detailPage.css")
+    );
     return `
     <!DOCTYPE html>
     <html lang="en">
     
     <head>
-        <meta charset="UTF-8">
         <link href="${bootstrapCSS}" rel="stylesheet">
-        <link href="${styleQuestionUri}" rel="stylesheet">
         <link href="${styleMainUri}" rel="stylesheet">
-        
+        <link href="${styleDetailUri}" rel="stylesheet">
+
     </head>
     
     <body class="bg-dark p-4 full-height-flex">
-            <div class="alert alert-success" role="alert">
-            <small>
-                Your security and data privacy are paramount to us. We assure you that we don't send any confidential data to any third-party AI models. CodeThreat uses Azure OpenAI in a private infrastructure, ensuring dedicated and isolated processing for each organization on the CodeThreat SAST platform.
-                As result, we only produce dedicated ai model and data endpoint for your own organization only.
-            </small>
-        </div>
             <div class="panel">
-            <h3 class="panel-header">Example Exploit Request or Methods</h3>
-            <div class="panel-content">
+              <div id="kbfields-title" class="panel-content"></div>
+            </div>
+            
+            <div class="panel">
+            <h3 class="panel-header">Description</h3>
+            <div id="description-content" class="panel-content">
                 To exploit the vulnerability, an attacker can use...
+              </div>
+              <p class="detail-group">
+            <svg class="detail-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            <a href="" id="readMoreLink"> 
+                Read More
+            </a></p>
             </div>
-        </div>
+            
+            </div>
         
         <div class="panel">
-            <h3 class="panel-header">Human Readable Flow Graph and Explanation</h3>
-            <div class="panel-content">
-                The vulnerability is caused by concatenating user...
+        <h3 class="panel-header">Mitigation</h3>
+        <div id="mitigation-content" class="panel-content">
+            What you can do to close this vulnerability...
+          </div>
+          <p class="detail-group">
+            <svg class="detail-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            <a href="" id="readMoreLink">
+                Read More
+            </a></p>
             </div>
-        </div>
-        
+            
+            </div>
+
         <div class="panel">
-            <h3 class="panel-header">Optimal Fix Remediation</h3>
-            <div class="panel-content">
-                To fix the connection string injection vulnerability...
-            </div>
-        </div>
-        </div>
+            <h3 class="panel-header">Labels</h3>
+            <span  class="labels "></span>
+          </div>
 
         <!-- Footer -->
         <div class="footer text-center">
@@ -133,11 +134,11 @@ export class askBarViewProvider implements vscode.WebviewViewProvider {
             <small><a href="https://github.com/CodeThreat/ct-vscode" class="text-info">Troubleshoot or get help on GitHub repo</a></small>
         </div>
 
+
         <script type="module" defer nonce="${getNonce()}" src="${bootstrapJs}"></script>
         <script type="module" defer nonce="${getNonce()}" src="${JQueryJS}"></script>
         <script defer src="${markdownRenderer}"></script>
         <script type="module" defer nonce="${getNonce()}" src="${scriptUri}"></script>
-    
     </body>
     </html>`;
   }

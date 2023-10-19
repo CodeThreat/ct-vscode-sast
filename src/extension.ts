@@ -1,44 +1,37 @@
 "use strict";
 import * as vscode from "vscode";
-import * as path from "path";
-import { initExtensionSettings, stateData } from "./extensionSettings";
-import { parseDataFromFile } from "./parse";
-import { getProjectName } from "./getRepoUrl";
+import {
+  initExtensionSettings,
+  stateData,
+} from "./webviews/components/extensionSettings";
 import { barViewProvider } from "./webviews/pages/sidebar";
-import { KBFields, FlowSteps, IssueState } from "./parse";
 import { env } from "vscode";
 import { showProgressNotification } from "./webviews/components/notifications";
 import { AIQuickAsk } from "./webviews/components/quickfix";
-import { updateDiagnostics, diaInfos, setDiagnostics, addDiagnostic, getDiagnostics } from "./webviews/components/updateDiagnostic";
+import { updateDiagnostics } from "./webviews/components/updateDiagnostic";
 import { askBarViewProvider } from "./webviews/pages/questionPage";
 import { askAIAssistant } from "./webviews/components/quickfix";
-const collection =
-vscode.languages.createDiagnosticCollection("ct-diagnostic");
+import { detailBarViewProvider } from "./webviews/pages/detailPage";
+import { GetDescMiti, GetDetails } from "./webviews/components/getDetail";
+import { getCodeThreatConfig } from "./webviews/components/getConfig";
+const collection = vscode.languages.createDiagnosticCollection("ct-diagnostic");
 
-export let extensionState: any = {}; // This variable is set at the top level of your extension
-
-function isOverlappingWithDiagnostics(startLine: number, endLine: number): boolean {
-  for (let diagnostic of diaInfos) {
-      if (startLine <= diagnostic.range.end.line && endLine >= diagnostic.range.start.line) {
-          return true;
-      }
-  }
-  return false;
-}
+export let extensionState: any = {};
+const config = getCodeThreatConfig();
 
 function debounce(func: Function, wait: number) {
   let timeout: NodeJS.Timeout;
 
   return function executedFunction(...args: any[]) {
-      const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-      };
-
+    const later = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+      func(...args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
   };
-};
+}
 
 function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
   const uri = event.document.uri;
@@ -61,12 +54,20 @@ export function activate(context: vscode.ExtensionContext) {
       );
     }
   );
-  context.subscriptions.push(openSettingsDisposable);
+
   let openHelpDisposable = vscode.commands.registerCommand(
     "codethreat-vscode.help",
     () => {
       const helpUrl = "https://www.codethreat.com/company/contact";
       env.openExternal(vscode.Uri.parse(helpUrl));
+    }
+  );
+  let openDetailDisposable = vscode.commands.registerCommand(
+    "codethreat-vscode.expand",
+    () => {
+      const projectName = config?.projectName;
+      const detailUrl = `https://dev.codethreat.com/kstore/${projectName}`;
+      env.openExternal(vscode.Uri.parse(detailUrl));
     }
   );
   let openRefreshDisposable = vscode.commands.registerCommand(
@@ -76,12 +77,14 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  context.subscriptions.push(openSettingsDisposable);
   context.subscriptions.push(openHelpDisposable);
   context.subscriptions.push(openRefreshDisposable);
+  context.subscriptions.push(openDetailDisposable);
+
   initExtensionSettings();
 
   const providerc = new barViewProvider(context.extensionUri);
-  
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -91,7 +94,6 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   const providercask = new askBarViewProvider(context.extensionUri);
-  // Make it visible
   providercask.show();
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -99,6 +101,16 @@ export function activate(context: vscode.ExtensionContext) {
       providercask
     )
   );
+
+  const providercdetail = new detailBarViewProvider(context.extensionUri);
+  providercdetail.show();
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      detailBarViewProvider.viewType,
+      providercdetail
+    )
+  );
+
   vscode.commands.registerCommand("codethreat-vscode.updateDiagnostic", () => {
     if (vscode.window.activeTextEditor) {
       updateDiagnostics(vscode.window.activeTextEditor.document, collection);
@@ -110,16 +122,15 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.commands.executeCommand("codethreat-vscode.showProgress");
     })
   );
-  const showAllNotifications = vscode.commands.registerCommand(
-    "codethreat-vscode.showAll",
-    () => {
-      //vscode.commands.executeCommand("codethreat-vscode.showProgress");
-    }
-  );
-  
+
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider("*", new AIQuickAsk(), {
       providedCodeActionKinds: AIQuickAsk.providedCodeActionKinds,
+    })
+  );
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider("*", new GetDetails(), {
+      providedCodeActionKinds: GetDetails.providedCodeActionKinds,
     })
   );
 
@@ -129,13 +140,15 @@ export function activate(context: vscode.ExtensionContext) {
     "codethreat-vscode.codethreat",
     () => {}
   );
-  const debouncedHandleDocumentChange = debounce(handleDocumentChange, 300); // 300ms delay
+  const debouncedHandleDocumentChange = debounce(handleDocumentChange, 300);
 
-  let disposableOnDidChange = vscode.workspace.onDidChangeTextDocument(event => {
-    if (event.document === vscode.window.activeTextEditor?.document) {
-      debouncedHandleDocumentChange(event);
+  let disposableOnDidChange = vscode.workspace.onDidChangeTextDocument(
+    (event) => {
+      if (event.document === vscode.window.activeTextEditor?.document) {
+        debouncedHandleDocumentChange(event);
+      }
     }
-  });
+  );
 
   const executeScriptDisposable = vscode.commands.registerCommand(
     "codethreat-vscode.barView",
@@ -143,9 +156,17 @@ export function activate(context: vscode.ExtensionContext) {
       askAIAssistant(issueId);
     }
   );
+
+  const executedetailDispoble = vscode.commands.registerCommand(
+    "codethreat-vscode.detailView",
+    (issueId) => {
+      GetDescMiti(issueId);
+    }
+  );
   context.subscriptions.push(disposableOnDidChange);
 
   context.subscriptions.push(executeScriptDisposable);
+  context.subscriptions.push(executedetailDispoble);
 
   if (vscode.window.activeTextEditor) {
     updateDiagnostics(vscode.window.activeTextEditor.document, collection);

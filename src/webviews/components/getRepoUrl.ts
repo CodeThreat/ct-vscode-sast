@@ -17,11 +17,12 @@ export function getRepositoryURL(): string | null {
           return match[1];
         }
       }else{
-        throw new Error("Dosya yok");
+        throw new Error("Folder Not Found! ");
       }
     }
-  } catch (error) {
-    console.error("Error found!:", error);
+  } catch (error: any) {
+    vscode.window.showErrorMessage(" Repository information not found! ");
+    return error;
   }
 
   return null;
@@ -31,15 +32,16 @@ export function getProjectName(): string | undefined   {
   try {
     const url=getRepositoryURL();
     if (url===null) {
-      throw new Error("url is undefined");
+      throw new Error("Url is undefined! ");
       
     }
     const startIndex = url.lastIndexOf('/') + 1;
     const endIndex = url.lastIndexOf('.git');
     const repoName = url.substring(startIndex, endIndex);
     return repoName;
-  } catch (error) {
-    console.error("Error found!:", error);
+  } catch (error: any) {
+    vscode.window.showErrorMessage("Project name not found! ");
+    return error;
   }
 }
 
@@ -60,8 +62,9 @@ if (workspaceFolderPath) {
     }
   }
 }
-  } catch (error) {
-    console.error("Error found!:", error);
+  } catch (error: any) {
+    vscode.window.showErrorMessage("Github Branch not found! ");
+    return error;
   }
 
   return null;

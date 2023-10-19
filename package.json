@@ -33,7 +33,7 @@
   "name": "codethreat-vscode",
   "displayName": "CodeThreat VSCode Plugin",
   "description": "CodeThreat provides static application security testing capabilities to help developers identify and fix security vulnerabilities in their code.",
-  "version": "0.89.9",
+  "version": "0.90.1",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -41,7 +41,6 @@
     "Linters",
     "Programming Languages"
   ],
-  
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
@@ -59,19 +58,13 @@
         "command": "codethreat-vscode.Refresh",
         "category": "codethreat",
         "title": "Refresh the Issue",
-        "icon": {
-          "dark": "./media/assets/arrow-2-circlepath-white.svg",
-          "light": "./media/assets/arrow-2-circlepath-black.svg"
-        }
+        "icon": "$(sync)"
       },
       {
         "command": "codethreat-vscode.help",
         "category": "codethreat",
         "title": "Help",
-        "icon": {
-          "dark": "./media/assets/help-white.svg",
-          "light": "./media/assets/help-black.svg"
-        }
+        "icon": "$(info)"
       },
       {
         "command": "codethreat-vscode.settings",
@@ -83,19 +76,15 @@
         "command": "codethreat-vscode.showProgress",
         "title": "Show Progress Notification",
         "category": "codethreat"
+      },
+      {
+        "command": "codethreat-vscode.expand",
+        "title": "Go to Page More Details",
+        "category": "codethreat",
+        "icon": "$(go-to-file)"
       }
     ],
     "configuration": [
-      {
-        "title": "Codethreat Settings",
-        "properties": {
-          "codethreat-vscode.settings": {
-            "type": "boolean",
-            "default": true,
-            "description": "Enable/Disable a feature"
-          }
-        }
-      },
       {
         "id": "codethreatOrganization",
         "title": "CodeThreat - Organization",
@@ -135,7 +124,7 @@
         {
           "id": "codethreat-vscode-activitybar",
           "title": "CodeThreat",
-          "icon": "media\\assets\\CT-icon.svg"
+          "icon": "media/assets/CT-icon.svg"
         }
       ]
     },
@@ -150,6 +139,11 @@
           "type": "webview",
           "id": "codethreat-vscode.askView",
           "name": "CodeThreat AI Output"
+        },
+        {
+          "type": "webview",
+          "id": "codethreat-vscode.detailView",
+          "name": "CodeThreat Issue Details"
         }
       ]
     },
@@ -169,11 +163,6 @@
           "command": "codethreat-vscode.settings",
           "group": "navigation",
           "when": "view == codethreat-vscode.barView"
-        },
-        {
-          "command": "codethreat-vscode.Refresh",
-          "group": "navigation",
-          "when": "view == codethreat-vscode.askView"
         },
         {
           "command": "codethreat-vscode.help",

@@ -1,7 +1,7 @@
 :root {
-  --vscode-dark-bg: #1e1e1e; /* Dark background color similar to VSCode */
-  --vscode-dark-fg: #d4d4d4; /* Foreground/text color for dark theme */
-  --vscode-link-color: #569cd6; /* Typical VSCode link color */
+  --vscode-dark-bg: #1e1e1e;
+  --vscode-dark-fg: #d4d4d4;
+  --vscode-link-color: #569cd6;
 }
 body {
   background-color: var(--vscode-dark-bg);
@@ -9,10 +9,9 @@ body {
   font-size: 0.7rem;
 }
 button {
-  white-space: nowrap; /* Prevents text wrapping inside the button */
-  overflow: hidden;   /* Ensures any overflow is hidden */
-  text-overflow: ellipsis; /* If text overflows, it will be truncated with an ellipsis */
-  min-width: 150px;   /* Sets a minimum width for the button */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 150px;
 }
 
 @media (max-width: 576px) { 
@@ -22,7 +21,6 @@ button {
   }
 }
 
-/* Make the main content take full height and use flex to position the footer at the bottom */
 .full-height-flex {
 display: flex;
 flex-direction: column;
@@ -33,10 +31,9 @@ min-height: 100vh;
 flex: 1;
 }
 
-/* Styling for the footer */
 .footer {
-font-size: 0.85rem; /* Reduced font size */
-margin-top: 1rem;   /* Space above the footer */
+font-size: 0.85rem;
+margin-top: 1rem;
 }
 h4,
 h5,
@@ -66,9 +63,9 @@ a:focus {
     156,
     214,
     0.8
-  ); /* Slightly lighter version of --vscode-link-color */
+  );
 }
-#scan-button {
+#buttons {
   display: block;
   border: none;
   margin: 0 auto;
@@ -83,7 +80,7 @@ a:focus {
   max-width: 320px;
   margin-top: 20px;
 }
-#scan-button:hover {
+#buttons:hover {
   background-color: gainsboro;
   opacity: 0.75;
 }

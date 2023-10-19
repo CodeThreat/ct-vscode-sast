@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as fs from "fs";
+export interface CodeThreatConfig {
+  apiBaseUrl: string;
+  apiToken: string;
+  organizatonName: string;
+  projectName: string;
+  branch: string;
+  type: string;
+}
 
 export interface CodeSnippet {
   text: string;
