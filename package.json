@@ -84,41 +84,6 @@
         "icon": "$(go-to-file)"
       }
     ],
-    "configuration": [
-      {
-        "id": "codethreatOrganization",
-        "title": "CodeThreat - Organization",
-        "order": 2,
-        "properties": {
-          "codethreat-vscode.codethreatOrganization": {
-            "type": "string",
-            "description": "CodeThreat Organization ID.`Documentation` ",
-            "editPresentation": "multilineText"
-          }
-        }
-      },
-      {
-        "id": "codethreatApiBaseUrl",
-        "title": "CodeThreat - Api Base Url",
-        "order": 1,
-        "properties": {
-          "codethreat-vscode.codethreatApiBaseUrl": {
-            "type": "string",
-            "description": "Optional override for CodeThreat API base URL. If you customize it, please make sure you have the same format. "
-          }
-        }
-      },
-      {
-        "id": "codethreatApiToken",
-        "title": "CodeThreat - Api Token",
-        "order": 1,
-        "properties": {
-          "codethreat-vscode.codethreatApiToken": {
-            "type": "string"
-          }
-        }
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
