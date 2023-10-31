@@ -24,7 +24,8 @@ const vscode = acquireVsCodeApi();
           });
           break;
           case "gopage":
-            document.getElementById("readMoreLink").href = message.data;
+            document.getElementById("readMoreLink1").href = message.data;
+            document.getElementById("readMoreLink2").href = message.data;
             break;  
     }
   });
